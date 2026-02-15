@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include "memory.h"
 
-typedef struct block_headerer{
+typedef long align;
+
+typedef struct block_header{
     void *address; //virtual address
     size_t size;
     int flag;
@@ -17,11 +19,13 @@ typedef struct GENMNG{
 //static block_header_t* list = NULL;
 static GENMNG general = {NULL};
 
-block_header *find_free_block(size_t size){
+block_header *find_free_block(size_t size){ //this function returns the first suitable block which will be split if the desired size is smaller than block size
     block_header *current = general.list;
 
     while(current){
-        if (current->flag & FREE && size <= current->size) return current;
+        if (size <= current->size){
+            return current;
+        }
         current = current->next;
     }
     return NULL;
@@ -47,6 +51,8 @@ void* cmalloc(void *desired_address, size_t size){
         return NULL;
     }
 
+    block_header_t *founded_block = find_free_block(size);
+    founded_block->size = founded_block->size - size;
     
 
     
@@ -55,11 +61,4 @@ void* cmalloc(void *desired_address, size_t size){
 
 void cfree(void *__address){
     return;
-}
-
-int main(){
-    printf("0x%0x\n", cmalloc(NULL, 2));
-    printf("0x%0x\n", cmalloc(NULL, 10));
-    printf("0x%0x\n", general.list[0]);
-    return 0;
 }
