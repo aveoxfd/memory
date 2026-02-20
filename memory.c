@@ -1,10 +1,18 @@
 #include <memoryapi.h>
+#include <windows.h>
 #include <stdio.h>
 #include "memory.h"
 
 /*
 p[i] = *(p + i)
 */
+
+#define NONE 0
+#define MESSAGE 0x10000000
+#define ERROR   0x20000000
+
+#define FIRST_INIT 0x1
+#define CANNOT_FIND_ADDRESS 0x1
 
 //typedef long align;
 
@@ -79,7 +87,7 @@ void* cmalloc(size_t size){
 
         free_block = new_block;
     }
-    block_header_t *next_from_free_tmp = free_block->next;
+    block_header_t *next_from_free_tmp = free_block->next; //temp buffer for next block from free list, because after splitting free_block->next will be changed
 
     if (size < free_block->size && free_block->size - size > sizeof(block_header_t)){ //spliting
         free_block->next = (block_header_t*)((char*)free_block + sizeof(block_header_t) + size); //address from old block to new
@@ -101,6 +109,8 @@ void* cmalloc(size_t size){
     return out;
 }
 
-void cfree(void *__address){
+void cfree(void *block){
+    //if (!block)return;
+
     return;
 }
