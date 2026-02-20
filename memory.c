@@ -9,7 +9,7 @@ p[i] = *(p + i)
 
 #define NONE 0
 #define MESSAGE 0x10000000
-#define ERROR   0x20000000
+#define ERROR_MSG   0x20000000
 
 #define FIRST_INIT 0x1
 #define CANNOT_FIND_ADDRESS 0x1
@@ -113,7 +113,6 @@ void cfree(void *block){
     if (!block)return;
 
     block_header *bl = (block_header_t*)((char*)block - sizeof(block_header));
-    bl->next = NULL;
     //the size parameter has been saved;
     
     bl->next = general.list;
