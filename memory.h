@@ -7,6 +7,6 @@
 typedef unsigned long long size_t;
 
 void* cmalloc(size_t size);
-void cfree(void *__address);
+void cfree(void *block);
 
 #endif
