@@ -30,7 +30,7 @@ void* cmalloc(size_t size){
     void *out; //returned address
 
     if (general.list == NULL){
-        printf("General list of headers is NULL.\n");
+        printf("General list of headers is NULL. %d\n", sizeof(block_header_t));
         block_header_t* temp = //start list
         (block_header_t*)VirtualAlloc(NULL, sizeof(block_header_t)+size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
@@ -39,20 +39,41 @@ void* cmalloc(size_t size){
 
         general.list = temp;
 
-        out = temp+temp->size;
+        out = temp+sizeof(temp);
         return out;
     }
 
     //search free space
     block_header_t *free_block = find_free_block(size);
+
+    if (free_block == NULL){ // no memory
+        printf("No memory. \n");
+
+        block_header *new_block = VirtualAlloc(NULL, sizeof(block_header_t)+size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+
+        new_block->next = general.list;
+        new_block->size = size;
+        general.list = new_block;
+
+        out = new_block + sizeof(block_header);
+        return out;
+    }
     block_header_t *next_from_free_tmp = free_block->next;
+
     if (size < free_block->size && free_block->size - size > sizeof(free_block)){ //spliting
         free_block->next = free_block + sizeof(free_block) + size; //address from old block to new
 
         //free_block->next->size = free_block->size - size;
         block_header_t *new_block = free_block->next;
         new_block->next = next_from_free_tmp;
+        new_block->size = free_block->size - size;
     }
+
+    if(size==free_block->size){
+        //nothing. out = free_block + sizeof(block_header)
+    }
+
+    out = free_block + sizeof(block_header_t);
 
     return out;
 }
