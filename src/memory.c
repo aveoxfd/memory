@@ -41,6 +41,7 @@ void delete_block_from_list(block_header_t *block){
     if (!general.list || !block)return;
     if (general.list == block){
         general.list = block->next;
+        return;
     }
 
     block_header *current = general.list;
