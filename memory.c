@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include "memory.h"
 
+/*
+p[i] = *(p + i)
+*/
+
 //typedef long align;
 
 typedef struct block_header{
@@ -27,12 +31,18 @@ block_header *find_free_block(size_t size){ //this function returns the first su
 }
 
 void delete_block_from_list(block_header_t *block){
-    block_header *current = general.list;
-    while (current != block){
-        if (current->next == block)break;
-        current = current->next;
+    if (!general.list || !block)return;
+    if (general.list == block){
+        general.list = block->next;
     }
-    current->next = block->next;
+
+    block_header *current = general.list;
+    while (current->next && current->next != block)current = current->next;
+    if (current->next == block)current->next = block->next;
+    else{
+        //TODO
+    }
+    return;
 }
 
 void* cmalloc(size_t size){
@@ -42,6 +52,11 @@ void* cmalloc(size_t size){
         printf("General list of headers is NULL. %d\n", sizeof(block_header_t));
         block_header_t* temp = //start list
         (block_header_t*)VirtualAlloc(NULL, sizeof(block_header_t)+size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+
+        if (temp == NULL){
+            printf("No memory. \n");
+            return NULL;
+        }
 
         temp->next = NULL;
         temp->size = size;
