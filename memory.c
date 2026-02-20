@@ -81,9 +81,9 @@ void* cmalloc(size_t size){
         //nothing. out = free_block + sizeof(block_header)
     }
 
-
-
     out = free_block + sizeof(block_header_t);
+
+    delete_block_from_list(free_block);
 
     return out;
 }
