@@ -110,7 +110,15 @@ void* cmalloc(size_t size){
 }
 
 void cfree(void *block){
-    //if (!block)return;
+    if (!block || !general.list)return;
 
+    block_header *bl = (char*)block - sizeof(block_header);
+    bl->next = NULL;
+    //the size parameter have been saved;
+    
+    block_header *prev = general.list;
+    while (prev->next)prev = prev->next;
+
+    prev->next = bl;
     return;
 }
