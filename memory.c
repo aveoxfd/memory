@@ -26,6 +26,15 @@ block_header *find_free_block(size_t size){ //this function returns the first su
     return NULL;
 }
 
+void delete_block_from_list(block_header_t *block){
+    block_header *current = general.list;
+    while (current != block){
+        if (current->next == block)break;
+        current = current->next;
+    }
+    current->next = block->next;
+}
+
 void* cmalloc(size_t size){
     void *out; //returned address
 
@@ -46,7 +55,7 @@ void* cmalloc(size_t size){
     //search free space
     block_header_t *free_block = find_free_block(size);
 
-    if (free_block == NULL){ // no memory
+    if (free_block == NULL){ // no memory. size > size of any block in list
         printf("No memory. \n");
 
         block_header *new_block = VirtualAlloc(NULL, sizeof(block_header_t)+size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
@@ -55,8 +64,7 @@ void* cmalloc(size_t size){
         new_block->size = size;
         general.list = new_block;
 
-        out = new_block + sizeof(block_header);
-        return out;
+        free_block = new_block;
     }
     block_header_t *next_from_free_tmp = free_block->next;
 
@@ -72,6 +80,8 @@ void* cmalloc(size_t size){
     if(size==free_block->size){
         //nothing. out = free_block + sizeof(block_header)
     }
+
+
 
     out = free_block + sizeof(block_header_t);
 
