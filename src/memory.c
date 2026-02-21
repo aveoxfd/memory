@@ -81,6 +81,10 @@ MEM_API void* cmalloc(size_t size){
         printf("No memory. \n");
 
         block_header *new_block = VirtualAlloc(NULL, sizeof(block_header_t)+size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
+        if (!new_block){
+            printf("VirtualAlloc failed.\n");
+            return NULL;
+        }
 
         new_block->next = general.list;
         new_block->size = size;
