@@ -8,7 +8,7 @@ p[i] = *(p + i)
 
 #define NONE 0
 #define MESSAGE 0x10000000
-#define ERROR_MSG   0x20000000
+#define ERROR_TYPE   0x20000000
 
 #define FIRST_INIT 0x1
 #define CANNOT_FIND_ADDRESS 0x1
@@ -156,27 +156,26 @@ MEM_API void cfree(void *block /* = x*/){ //free with merge
     return;
 }
 
-MEM_API void crealloc(void *block, size_t size){ // <---- fix
-    if (!block || !size)return;
-
-    block_header_t *bl = (block_header_t*)((char*)(block) - sizeof(block_header_t));
-
-    size_t new_size = sizeof(block_header_t) + bl->size + size; //full size of block
-
-    block_header_t *new_block = cmalloc(new_size);
-
-    if (!new_block)return;
-
-    void *new_block_data_ptr = (void*)((char*)new_block + sizeof(block_header_t));
-
-    new_block->next = bl->next;
-    new_block -> size = new_size - sizeof(block_header_t);
-
-    for (int i = 0; i < bl->size; i++){
-        *((char*)new_block_data_ptr + i) = *((char*)block + i);
+MEM_API void* crealloc(void *block, size_t size){ // fixed v1.1
+    if (!block){
+        return cmalloc(size);
+    }
+    if (size == 0){
+        cfree(block);
+        return NULL;
     }
 
-    cfree(block);
-    block = new_block_data_ptr;
-    return;
+    block_header_t *bl = (block_header_t*)((char*)(block) - sizeof(block_header_t)); //old block
+
+    void *new_data = cmalloc(size);
+    if (!new_data)return NULL;
+
+    size_t copy_size = bl->size < size ? bl->size : size;
+
+    for (int i = 0; i < copy_size; i++){ //copy data
+        *((char*)new_data + i) = *((char*)block + i);
+    }
+
+    cfree(block); //free old block
+    return NULL;
 }
