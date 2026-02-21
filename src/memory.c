@@ -13,12 +13,15 @@ p[i] = *(p + i)
 #define FIRST_INIT 0x1
 #define CANNOT_FIND_ADDRESS 0x1
 
+extern void print_msg(const char message_code);
+
 //typedef long align;
 
 typedef struct block_header{
     size_t size;
     char flag;
     struct block_header *next;
+    //align x
 }block_header, block_header_t;
 
 typedef struct GENMNG{
@@ -58,12 +61,11 @@ MEM_API void* cmalloc(size_t size){
     void *out; //returned address
 
     if (general.list == NULL){
-        printf("General list of headers is NULL. %d\n", sizeof(block_header_t));
         block_header_t* temp = //start list
         (block_header_t*)VirtualAlloc(NULL, sizeof(block_header_t)+size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
 
         if (temp == NULL){
-            printf("No memory. \n");
+            //error msg
             return NULL;
         }
 
@@ -78,11 +80,10 @@ MEM_API void* cmalloc(size_t size){
     block_header_t *free_block = find_free_block(size);
 
     if (free_block == NULL){ // no memory. size > size of any block in list
-        printf("No memory. \n");
 
         block_header *new_block = VirtualAlloc(NULL, sizeof(block_header_t)+size, MEM_COMMIT | MEM_RESERVE, PAGE_READWRITE);
         if (!new_block){
-            printf("VirtualAlloc failed.\n");
+            //error msg
             return NULL;
         }
 
@@ -143,7 +144,10 @@ void merge(block_header_t* block){
 }
 
 MEM_API void cfree(void *block /* = x*/){ //free with merge
-    if (!block)return;
+    if (!block){
+        //error msg
+        return;
+    }
 
     block_header *bl = (block_header_t*)((char*)block - sizeof(block_header));
     //the size parameter has been saved;
@@ -158,10 +162,14 @@ MEM_API void cfree(void *block /* = x*/){ //free with merge
 
 MEM_API void* crealloc(void *block, size_t size){ // fixed v1.1
     if (!block){
+        if (size == 0){
+            cfree(block);
+        }
         return cmalloc(size);
     }
     if (size == 0){
         cfree(block);
+        //error msg
         return NULL;
     }
 
@@ -177,5 +185,5 @@ MEM_API void* crealloc(void *block, size_t size){ // fixed v1.1
     }
 
     cfree(block); //free old block
-    return NULL;
+    return new_data;
 }
