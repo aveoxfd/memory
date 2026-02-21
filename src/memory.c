@@ -123,3 +123,28 @@ MEM_API void cfree(void *block /* = x*/){
     //TODO: merge blocks
     return;
 }
+
+MEM_API void crealloc(void *block, size_t size){
+    if (!block || !size)return;
+
+    block_header_t *bl = (block_header_t*)((char*)(block) - sizeof(block_header_t));
+
+    size_t new_size = sizeof(block_header_t) + bl->size + size; //full size of block
+
+    block_header_t *new_block = cmalloc(new_size);
+
+    if (!new_block)return;
+
+    void *new_block_data_ptr = (void*)((char*)new_block + sizeof(block_header_t));
+
+    new_block->next = bl->next;
+    new_block -> size = new_size - sizeof(block_header_t);
+
+    for (int i = 0; i < bl->size; i++){
+        *((char*)new_block_data_ptr + i) = *((char*)block + i);
+    }
+
+    cfree(block);
+    block = new_block_data_ptr;
+    return;
+}
