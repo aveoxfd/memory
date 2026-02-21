@@ -33,6 +33,7 @@ block_header *find_free_block(size_t size){ //this function returns the first su
     block_header_t *current = general.list;
     while(current){
         if (size <= current->size)return current;
+        current = current->next;
     }
     return NULL;
 }
@@ -108,8 +109,36 @@ MEM_API void* cmalloc(size_t size){
 
     return out;
 }
+void merge(block_header_t* block){
+    void* end_block = (void*)((char*)block + sizeof(block_header_t) + block->size);
+    block_header_t* current = general.list;
 
-MEM_API void cfree(void *block /* = x*/){
+    while (current){
+        if (current == block){
+            current = current->next;
+            continue;
+        }
+        void* current_end_block = (void*)((char*)current + sizeof(block_header_t) + current->size);
+
+        if ((void*)block == current_end_block){ // part of big another block
+            current->size = current->size + sizeof(block_header_t) + block->size;
+            delete_block_from_list(block);
+            merge(current);
+            return;
+        }
+
+        if ((void*)end_block == (void*)current){ //size: block += current
+            block->size += sizeof(block_header_t) + current->size;
+            delete_block_from_list(current);
+            merge(block);
+            return;
+        }
+        current = current->next;
+    }
+    return;
+}
+
+MEM_API void cfree(void *block /* = x*/){ //free with merge
     if (!block)return;
 
     block_header *bl = (block_header_t*)((char*)block - sizeof(block_header));
@@ -118,13 +147,12 @@ MEM_API void cfree(void *block /* = x*/){
     bl->next = general.list;
     general.list = bl;
 
-    block = NULL;
+    merge(bl);
 
-    //TODO: merge blocks
     return;
 }
 
-MEM_API void crealloc(void *block, size_t size){
+MEM_API void crealloc(void *block, size_t size){ // <---- fix
     if (!block || !size)return;
 
     block_header_t *bl = (block_header_t*)((char*)(block) - sizeof(block_header_t));
