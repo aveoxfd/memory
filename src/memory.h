@@ -19,7 +19,7 @@
 typedef unsigned long long size_t;
 
 MEM_API void* cmalloc(size_t size);
-MEM_API void cfree(void *block);
-MEM_API void crealloc(void *block, size_t size);
+MEM_API void cfree(void *block); //free with merge
+MEM_API void* crealloc(void *block, size_t size);
 
 #endif
