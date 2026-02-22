@@ -15,13 +15,13 @@ p[i] = *(p + i)
 
 extern void print_msg(const char message_code);
 
-//typedef long align;
+typedef long align; //not neccessary, but it is used to make sure that the header size is a multiple of the alignment requirement of the system
 
 typedef struct block_header{
     size_t size;
     char flag;
     struct block_header *next;
-    //align x
+    align x
 }block_header, block_header_t;
 
 typedef struct GENMNG{
