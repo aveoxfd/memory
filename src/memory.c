@@ -183,3 +183,10 @@ MEM_API void* crealloc(void *block, size_t size){ // fixed v1.1
     cfree(block); //free old block
     return new_data;
 }
+
+//======================================================================================
+MEM_API void memcpy_av(void *restrict dst, void *restrict src, const unsigned long size){
+    for (int i = 0; i < size; i++){
+        *((unsigned char*)dst + i) = *((unsigned char*)src + i);
+    }
+}
