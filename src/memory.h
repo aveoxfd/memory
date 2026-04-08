@@ -1,20 +1,16 @@
 #ifndef MEMORY_H
 #define MEMORY_H
 
-#if defined(MEMORY_STATIC)
-    #define MEM_API
-    #elif defined(_WIN32) || defined(_WIN64) || defined(_CYGWIN__)
-        #ifdef MEM_BUILD_DLL
-            #define MEM_API __declspec(dllexport)
-        #else
-            #define MEM_API __declspec(dllimport)
-    #endif
-    #else
-        #define MEM_API
+#define MEM_API
+
+#if defined(DLLBLD)
+#if defined (_WIN32) || defined (_WIN64)
+#define MEM_API __declspec(dllexport)
+#endif
 #endif
 
-#define FREE        0b00000001
-#define IS_USING    0b00000010
+#define IS_FREE         0b00000001
+#define IS_USING        0b00000010
 
 typedef unsigned long long size_t;
 
