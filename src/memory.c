@@ -6,10 +6,6 @@
 p[i] = *(p + i)
 */
 
-#define NONE 0
-#define MESSAGE 0x10000000
-#define ERROR_TYPE   0x20000000
-
 #define FIRST_INIT 0x1
 #define CANNOT_FIND_ADDRESS 0x1
 
@@ -21,8 +17,8 @@ typedef struct block_header{
     size_t size;
     char flag;
     struct block_header *next;
-    align x
-}block_header, block_header_t;
+    align x;
+}block_header, block_header_t, bh, bh_t;
 
 typedef struct GENMNG{
     block_header_t *list; //list of free blocks
